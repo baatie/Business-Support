@@ -53,11 +53,19 @@ export default function Layout() {
             `}>
                 <div className="h-full flex flex-col p-4">
                     {/* Logo/Brand */}
+                    {/* Logo/Brand */}
                     <div className="flex items-center gap-3 px-2 mb-8 mt-2">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-white font-bold text-xl">
-                            B
+                        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)] flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/20">
+                            <span className="text-white font-bold text-xl">P</span>
                         </div>
-                        <span className="font-bold text-xl tracking-tight">BizSupport</span>
+                        <div>
+                            <h1 className="font-bold text-lg leading-tight text-[var(--color-primary)]">
+                                Business Support
+                            </h1>
+                            <p className="text-[10px] font-bold text-[var(--color-secondary)] uppercase tracking-wider">
+                                Controller Pro
+                            </p>
+                        </div>
                     </div>
 
                     {/* Business Selector */}

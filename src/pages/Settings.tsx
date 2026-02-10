@@ -367,19 +367,21 @@ export default function Settings() {
                             <label className="text-sm font-medium">Net Pay Schedule</label>
                             <div className="relative">
                                 <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50" />
-                                <select
+                                <input
+                                    list="net-pay-options"
                                     value={netPay}
                                     onChange={(e) => setNetPay(e.target.value)}
                                     className="input pl-10"
+                                    placeholder="Select or type custom schedule (e.g. Net 45)"
                                     disabled={!isOwner}
-                                >
-                                    <option value="">Select Schedule</option>
-                                    <option value="Net 7">Net 7</option>
-                                    <option value="Net 15">Net 15</option>
-                                    <option value="Net 30">Net 30</option>
-                                    <option value="Net 60">Net 60</option>
-                                    <option value="Due on Receipt">Due on Receipt</option>
-                                </select>
+                                />
+                                <datalist id="net-pay-options">
+                                    <option value="Net 7" />
+                                    <option value="Net 15" />
+                                    <option value="Net 30" />
+                                    <option value="Net 60" />
+                                    <option value="Due on Receipt" />
+                                </datalist>
                             </div>
                         </div>
                     </div>

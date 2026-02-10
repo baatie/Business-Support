@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { BusinessProvider } from './context/BusinessContext'
@@ -11,8 +12,15 @@ import Projects from './pages/Projects'
 import Settings from './pages/Settings'
 import Layout from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import SplashScreen from './components/SplashScreen'
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true)
+
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />
+  }
+
   return (
     <BrowserRouter>
       <AuthProvider>
