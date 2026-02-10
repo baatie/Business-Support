@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { BusinessProvider } from './context/BusinessContext'
 import Auth from './pages/Auth'
+import UpdatePassword from './pages/UpdatePassword'
 import Dashboard from './pages/Dashboard'
 import Customers from './pages/Customers'
 import Invoices from './pages/Invoices'
@@ -18,6 +19,7 @@ function App() {
         <BusinessProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>

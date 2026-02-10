@@ -36,6 +36,8 @@ export default function InvoiceModal({ onClose, onSuccess, initialData }: Invoic
     const [customerId, setCustomerId] = useState(initialData?.customer_id || '')
     const [contactId, setContactId] = useState(initialData?.contact_id || '')
     const [taxRate, setTaxRate] = useState<number>(initialData?.tax_rate || 0)
+    const [purchaseOrder, setPurchaseOrder] = useState(initialData?.purchase_order || '')
+    const [invoiceNumber, setInvoiceNumber] = useState(initialData?.invoice_number || `INV-${Date.now().toString().slice(-6)}`)
     const [issueDate, setIssueDate] = useState(initialData?.issue_date || format(new Date(), 'yyyy-MM-dd'))
     const [dueDate, setDueDate] = useState(initialData?.due_date || format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'))
     const [items, setItems] = useState<InvoiceItem[]>(initialData?.items || [
@@ -101,9 +103,6 @@ export default function InvoiceModal({ onClose, onSuccess, initialData }: Invoic
             // Calculate total
             const totalAmount = calculateTotal()
 
-            // Generate invoice number (simple timestamp based for now)
-            const invoiceNumber = initialData?.invoice_number || `INV-${Date.now().toString().slice(-6)}`
-
             const invoiceData = {
                 business_id: activeBusiness.id,
                 customer_id: customerId,
@@ -114,6 +113,7 @@ export default function InvoiceModal({ onClose, onSuccess, initialData }: Invoic
                 tax_rate: taxRate,
                 contact_id: contactId || null,
                 invoice_number: invoiceNumber,
+                purchase_order: purchaseOrder,
                 status: initialData?.status || 'draft'
             }
 
@@ -166,23 +166,43 @@ export default function InvoiceModal({ onClose, onSuccess, initialData }: Invoic
                             </select>
                         </div>
                         <div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Billing Contact</label>
-                                <select
-                                    value={contactId}
-                                    onChange={(e) => setContactId(e.target.value)}
-                                    className="input"
-                                    disabled={!customerId || contacts.length === 0}
-                                >
-                                    <option value="">
-                                        {!customerId ? 'Select Customer First' : contacts.length === 0 ? 'No Contacts Found' : 'Select Contact (Optional)'}
-                                    </option>
-                                    {contacts.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <label className="block text-sm font-medium mb-1">Billing Contact</label>
+                            <select
+                                value={contactId}
+                                onChange={(e) => setContactId(e.target.value)}
+                                className="input"
+                                disabled={!customerId || contacts.length === 0}
+                            >
+                                <option value="">
+                                    {!customerId ? 'Select Customer First' : contacts.length === 0 ? 'No Contacts Found' : 'Select Contact (Optional)'}
+                                </option>
+                                {contacts.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
+                                ))}
+                            </select>
                         </div>
+                        {/* New Fields Row */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Invoice Number</label>
+                            <input
+                                type="text"
+                                value={invoiceNumber}
+                                onChange={(e) => setInvoiceNumber(e.target.value)}
+                                className="input"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">PO Number</label>
+                            <input
+                                type="text"
+                                value={purchaseOrder}
+                                onChange={(e) => setPurchaseOrder(e.target.value)}
+                                className="input"
+                                placeholder="Optional"
+                            />
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium mb-1">Issue Date</label>
                             <input
@@ -272,7 +292,7 @@ export default function InvoiceModal({ onClose, onSuccess, initialData }: Invoic
                                 <input
                                     type="number"
                                     min="0"
-                                    step="0.1"
+                                    step="0.001"
                                     value={taxRate}
                                     onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
                                     className="input w-20 py-1 text-right text-sm"

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { MOCK_USER } from '../lib/mockData'
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [session, setSession] = useState<Session | null>(null)
     const [loading, setLoading] = useState(true)
     const [isDemo, setIsDemo] = useState(false)
+    const navigate = useNavigate()
 
     useEffect(() => {
         // Check for demo mode in local storage
@@ -60,15 +62,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         initAuth()
 
         // Listen for changes on auth state (sing in, sign out, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (storedDemo) return
             setSession(session)
             setUser(session?.user ?? null)
             setLoading(false)
+
+            if (event === 'PASSWORD_RECOVERY') {
+                navigate('/update-password')
+            }
         })
 
         return () => subscription.unsubscribe()
-    }, [])
+    }, [navigate])
 
     const signOut = async () => {
         if (isDemo) {

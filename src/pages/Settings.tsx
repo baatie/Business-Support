@@ -18,7 +18,7 @@ interface Member {
 export default function Settings() {
     const { activeBusiness, updateBusiness } = useBusiness()
     const { user } = useAuth()
-    const [activeTab, setActiveTab] = useState<'general' | 'team' | 'categories'>('general')
+    const [activeTab, setActiveTab] = useState<'general' | 'team' | 'categories' | 'profile'>('general')
 
     // General Settings State
     const [name, setName] = useState('')
@@ -26,6 +26,12 @@ export default function Settings() {
     const [phone, setPhone] = useState('')
     const [netPay, setNetPay] = useState('')
     const [theme, setTheme] = useState('')
+
+    // Profile Settings State
+    const [fullName, setFullName] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+    const [profileLoading, setProfileLoading] = useState(false)
 
     // Team Settings State
     const [members, setMembers] = useState<Member[]>([])
@@ -48,7 +54,29 @@ export default function Settings() {
                 fetchMembers()
             }
         }
-    }, [activeBusiness, activeTab])
+        if (activeTab === 'profile' && user) {
+            fetchProfile()
+        }
+    }, [activeBusiness, activeTab, user])
+
+    const fetchProfile = async () => {
+        if (!user) return
+        setProfileLoading(true)
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', user.id)
+                .single()
+
+            if (error) throw error
+            setFullName(data?.full_name || '')
+        } catch (error) {
+            console.error('Error fetching profile:', error)
+        } finally {
+            setProfileLoading(false)
+        }
+    }
 
     const fetchMembers = async () => {
         if (!activeBusiness) return
@@ -61,6 +89,9 @@ export default function Settings() {
                     profile:profiles(email, full_name)
                 `)
                 .eq('business_id', activeBusiness.id)
+                .
+                // ... (rest of fetchMembers logic remains same, just ensuring context)
+                eq('business_id', activeBusiness.id)
 
             if (error) throw error
             // @ts-ignore
@@ -73,6 +104,7 @@ export default function Settings() {
     }
 
     const handleSaveGeneral = async (e: React.FormEvent) => {
+        // ... (existing handleSaveGeneral)
         e.preventDefault()
         if (!activeBusiness) return
         setSaving(true)
@@ -174,6 +206,7 @@ export default function Settings() {
             setMessage({ type: 'success', text: 'Business deleted successfully. Reloading...' })
             setTimeout(() => {
                 window.location.reload()
+                window.location.href = '/'
             }, 1000)
         } catch (error: any) {
             console.error('Error deleting business:', error)
@@ -182,9 +215,46 @@ export default function Settings() {
         }
     }
 
-    if (!activeBusiness) return <div className="p-8">Loading...</div>
+    const isOwner = activeBusiness?.owner_id === user?.id
 
-    const isOwner = activeBusiness.owner_id === user?.id
+    const handleUpdateProfile = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!user) return
+        setSaving(true)
+        setMessage({ type: '', text: '' })
+
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ full_name: fullName })
+                .eq('id', user.id)
+
+            if (error) throw error
+
+            if (newPassword) {
+                if (newPassword !== confirmPassword) {
+                    throw new Error('Passwords do not match')
+                }
+                const { error: pwError } = await supabase.auth.updateUser({
+                    password: newPassword
+                })
+                if (pwError) throw pwError
+            }
+
+            setMessage({ type: 'success', text: 'Profile updated successfully' })
+            setNewPassword('')
+            setConfirmPassword('')
+        } catch (error: any) {
+            console.error(error)
+            setMessage({ type: 'error', text: error.message || 'Failed to update profile' })
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    // ... (rest of render logic)
+
+    if (!activeBusiness) return <div className="p-8">Loading...</div>
 
     return (
         <div className="p-6 max-w-4xl mx-auto animate-fade-in text-[var(--color-primary)]">
@@ -192,10 +262,10 @@ export default function Settings() {
             <p className="text-[var(--color-secondary)] mb-8">Manage {activeBusiness.name} profile and team</p>
 
             {/* Tabs */}
-            <div className="flex space-x-4 border-b border-[var(--color-secondary)]/20 mb-6">
+            <div className="flex space-x-4 border-b border-[var(--color-secondary)]/20 mb-6 overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('general')}
-                    className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'general'
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'general'
                         ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]'
                         : 'text-[var(--color-secondary)] hover:text-[var(--color-primary)]'
                         }`}
@@ -204,7 +274,7 @@ export default function Settings() {
                 </button>
                 <button
                     onClick={() => setActiveTab('categories')}
-                    className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'categories'
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'categories'
                         ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]'
                         : 'text-[var(--color-secondary)] hover:text-[var(--color-primary)]'
                         }`}
@@ -213,12 +283,21 @@ export default function Settings() {
                 </button>
                 <button
                     onClick={() => setActiveTab('team')}
-                    className={`pb-2 px-4 font-medium transition-colors ${activeTab === 'team'
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'team'
                         ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]'
                         : 'text-[var(--color-secondary)] hover:text-[var(--color-primary)]'
                         }`}
                 >
                     Team Members
+                </button>
+                <button
+                    onClick={() => setActiveTab('profile')}
+                    className={`pb-2 px-4 font-medium transition-colors whitespace-nowrap ${activeTab === 'profile'
+                        ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]'
+                        : 'text-[var(--color-secondary)] hover:text-[var(--color-primary)]'
+                        }`}
+                >
+                    User Profile
                 </button>
             </div>
 
@@ -230,6 +309,7 @@ export default function Settings() {
             )}
 
             {activeTab === 'general' ? (
+                // ... (General tab content)
                 <form onSubmit={handleSaveGeneral} className="space-y-6 animate-fade-in">
                     {/* General Info Card */}
                     <div className="card">
@@ -344,9 +424,69 @@ export default function Settings() {
                 </form>
             ) : activeTab === 'categories' ? (
                 <EditCategories />
+            ) : activeTab === 'profile' ? (
+                <form onSubmit={handleUpdateProfile} className="space-y-6 animate-fade-in">
+                    <div className="card">
+                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2 border-b border-[var(--color-secondary)]/10 pb-2">
+                            User Profile
+                        </h2>
+
+                        {profileLoading ? <p>Loading profile...</p> : (
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Full Name</label>
+                                    <input
+                                        type="text"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        className="input"
+                                        placeholder="John Doe"
+                                    />
+                                </div>
+
+                                <div className="pt-4 border-t border-gray-100">
+                                    <h3 className="font-medium mb-3">Change Password</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">New Password</label>
+                                            <input
+                                                type="password"
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className="input"
+                                                placeholder="Leave blank to keep current"
+                                                minLength={6}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">Confirm New Password</label>
+                                            <input
+                                                type="password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                className="input"
+                                                placeholder="Confirm new password"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end">
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="btn-primary flex items-center gap-2 min-w-[120px] justify-center"
+                        >
+                            {saving ? <span className="animate-spin">⌛</span> : <Save size={20} />}
+                            Update Profile
+                        </button>
+                    </div>
+                </form>
             ) : (
                 <div className="space-y-6 animate-fade-in">
-                    {/* Invite Card */}
+                    {/* ... (Existing Team Members Tab content) */}
                     {isOwner && (
                         <div className="card bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20">
                             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
