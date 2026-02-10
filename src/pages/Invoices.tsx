@@ -30,6 +30,11 @@ interface Invoice {
         name: string
         email: string
     }
+    expenses?: {
+        id: string
+        description: string
+        amount: number
+    }[]
 }
 
 export default function Invoices() {
@@ -63,7 +68,7 @@ export default function Invoices() {
 
         const { data, error } = await supabase
             .from('invoices')
-            .select('*, customers(name, email, logo_url, address), customer_contacts(name, email)')
+            .select('*, customers(name, email, logo_url, address), customer_contacts(name, email), expenses(*)')
             .eq('business_id', activeBusiness.id)
             .order('created_at', { ascending: false })
 
@@ -329,6 +334,40 @@ export default function Invoices() {
                                         <div className="flex justify-between font-bold text-xl border-t border-gray-800 pt-2">
                                             <span>Total:</span>
                                             <span>${selectedInvoice.total_amount.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 pt-8 border-t border-gray-200 print:hidden">
+                                    <h4 className="font-bold text-gray-800 mb-4">Internal Details (Not on Invoice)</h4>
+
+                                    <div className="grid grid-cols-2 gap-8 mb-6">
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h5 className="font-medium text-gray-600 mb-2">Linked Expenses</h5>
+                                            {selectedInvoice.expenses && selectedInvoice.expenses.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {selectedInvoice.expenses.map((expense: any) => (
+                                                        <div key={expense.id} className="flex justify-between text-sm">
+                                                            <span>{expense.description}</span>
+                                                            <span className="font-medium text-red-600">-${expense.amount.toFixed(2)}</span>
+                                                        </div>
+                                                    ))}
+                                                    <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold text-sm">
+                                                        <span>Total Expenses:</span>
+                                                        <span className="text-red-600">-${selectedInvoice.expenses.reduce((sum: number, e: any) => sum + e.amount, 0).toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-400 italic">No expenses linked to this invoice.</p>
+                                            )}
+                                        </div>
+
+                                        <div className="bg-blue-50 p-4 rounded-lg flex flex-col justify-center items-center text-center">
+                                            <h5 className="font-medium text-blue-800 mb-1">Net Yield / Profit</h5>
+                                            <div className="text-3xl font-black text-blue-600 mb-1">
+                                                ${(selectedInvoice.total_amount - (selectedInvoice.expenses?.reduce((sum: number, e: any) => sum + e.amount, 0) || 0)).toFixed(2)}
+                                            </div>
+                                            <p className="text-xs text-blue-400">Total Amount - Linked Expenses</p>
                                         </div>
                                     </div>
                                 </div>
