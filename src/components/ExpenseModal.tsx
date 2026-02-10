@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 interface ExpenseModalProps {
     onClose: () => void
     onSuccess: () => void
+    initialData?: any
 }
 
 interface Customer {
@@ -23,20 +24,27 @@ const DEFAULT_CATEGORIES = [
     'Office Supplies', 'Travel', 'Software', 'Utilities', 'Rent', 'Marketing', 'Contractors'
 ]
 
-export default function ExpenseModal({ onClose, onSuccess }: ExpenseModalProps) {
+export default function ExpenseModal({ onClose, onSuccess, initialData }: ExpenseModalProps) {
     const { activeBusiness } = useBusiness()
     const [customers, setCustomers] = useState<Customer[]>([])
     const [invoices, setInvoices] = useState<Invoice[]>([])
     const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES)
-    const [amount, setAmount] = useState('')
-    const [category, setCategory] = useState(DEFAULT_CATEGORIES[0])
+    const [amount, setAmount] = useState(initialData?.amount?.toString() || '')
+    const [category, setCategory] = useState(initialData?.category || DEFAULT_CATEGORIES[0])
     const [customCategory, setCustomCategory] = useState('')
-    const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'))
-    const [description, setDescription] = useState('')
-    const [customerId, setCustomerId] = useState('')
-    const [invoiceId, setInvoiceId] = useState('')
+    const [date, setDate] = useState(initialData?.date || format(new Date(), 'yyyy-MM-dd'))
+    const [description, setDescription] = useState(initialData?.description || '')
+    const [customerId, setCustomerId] = useState(initialData?.customer_id || '')
+    const [invoiceId, setInvoiceId] = useState(initialData?.invoice_id || '')
     const [receiptFile, setReceiptFile] = useState<File | null>(null)
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (initialData && !DEFAULT_CATEGORIES.includes(initialData.category)) {
+            setCategory('Other')
+            setCustomCategory(initialData.category)
+        }
+    }, [initialData])
 
     useEffect(() => {
         if (activeBusiness) {
@@ -84,7 +92,7 @@ export default function ExpenseModal({ onClose, onSuccess }: ExpenseModalProps) 
 
         try {
             const finalCategory = category === 'Other' ? customCategory : category
-            let receiptUrl = null
+            let receiptUrl = initialData?.receipt_url || null
 
             if (receiptFile) {
                 const fileExt = receiptFile.name.split('.').pop()
@@ -101,22 +109,32 @@ export default function ExpenseModal({ onClose, onSuccess }: ExpenseModalProps) 
                 receiptUrl = data.publicUrl
             }
 
-            const { error } = await supabase
-                .from('expenses')
-                .insert([
-                    {
-                        business_id: activeBusiness.id,
-                        customer_id: customerId || null,
-                        invoice_id: invoiceId || null,
-                        amount: parseFloat(amount),
-                        category: finalCategory,
-                        date,
-                        description,
-                        receipt_url: receiptUrl
-                    }
-                ])
+            const payload = {
+                business_id: activeBusiness.id,
+                customer_id: customerId || null,
+                invoice_id: invoiceId || null,
+                amount: parseFloat(amount),
+                category: finalCategory,
+                date,
+                description,
+                receipt_url: receiptUrl
+            }
 
-            if (error) throw error
+            if (initialData?.id) {
+                // Update
+                const { error } = await supabase
+                    .from('expenses')
+                    .update(payload)
+                    .eq('id', initialData.id)
+                if (error) throw error
+            } else {
+                // Insert
+                const { error } = await supabase
+                    .from('expenses')
+                    .insert([payload])
+                if (error) throw error
+            }
+
             onSuccess()
             onClose()
         } catch (error) {
@@ -133,7 +151,7 @@ export default function ExpenseModal({ onClose, onSuccess }: ExpenseModalProps) 
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
                     <X size={24} />
                 </button>
-                <h2 className="text-2xl font-bold mb-4">Add Expense</h2>
+                <h2 className="text-2xl font-bold mb-4">{initialData ? 'Edit Expense' : 'Add Expense'}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium mb-1">Amount</label>
