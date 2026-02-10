@@ -117,7 +117,7 @@ export default function Customers() {
                                         <p className="text-sm text-[var(--color-secondary)]">{customer.phone || 'No phone'}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-1">
                                     <button
                                         onClick={() => setSelectedCustomerForContacts(customer)}
                                         className="p-2 text-[var(--color-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-secondary)]/10 rounded"

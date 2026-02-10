@@ -16,8 +16,9 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         <div
             className={`fixed inset-0 z-[100] bg-[var(--color-primary)] flex flex-col items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
-            <div className="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-sm mb-6 animate-bounce">
-                <span className="text-white font-bold text-5xl">P</span>
+            <div className="w-32 h-32 bg-white/10 rounded-3xl flex flex-col items-center justify-center backdrop-blur-md mb-8 animate-bounce border border-white/20 shadow-2xl">
+                <span className="text-white font-black text-5xl leading-none tracking-tighter mb-2">BSC</span>
+                <span className="text-blue-100 font-bold text-xl tracking-[0.3em]">PRO</span>
             </div>
 
             <h1 className="text-3xl font-bold text-white mb-2 animate-pulse">

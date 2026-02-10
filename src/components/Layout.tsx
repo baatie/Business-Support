@@ -55,8 +55,9 @@ export default function Layout() {
                     {/* Logo/Brand */}
                     {/* Logo/Brand */}
                     <div className="flex items-center gap-3 px-2 mb-8 mt-2">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)] flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/20">
-                            <span className="text-white font-bold text-xl">P</span>
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-blue-600 flex flex-col items-center justify-center shadow-lg shadow-[var(--color-primary)]/20 border border-white/10">
+                            <span className="text-white font-black text-sm leading-none tracking-tighter">BSC</span>
+                            <span className="text-[8px] font-bold text-blue-100/80 tracking-widest mt-0.5">PRO</span>
                         </div>
                         <div>
                             <h1 className="font-bold text-lg leading-tight text-[var(--color-primary)]">

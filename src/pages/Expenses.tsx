@@ -191,7 +191,7 @@ export default function Expenses() {
                                         -{new Intl.NumberFormat('en-US', { style: 'currency', currency: activeBusiness?.currency || 'USD' }).format(expense.amount)}
                                     </td>
                                     <td className="p-4">
-                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => openEditModal(expense)}
                                                 className="p-1 text-gray-400 hover:text-[var(--color-primary)] transition-colors"
