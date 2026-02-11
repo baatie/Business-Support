@@ -20,17 +20,15 @@ interface Invoice {
     invoice_number: string
 }
 
-const DEFAULT_CATEGORIES = [
-    'Office Supplies', 'Travel', 'Software', 'Utilities', 'Rent', 'Marketing', 'Contractors'
-]
+
 
 export default function ExpenseModal({ onClose, onSuccess, initialData }: ExpenseModalProps) {
     const { activeBusiness } = useBusiness()
     const [customers, setCustomers] = useState<Customer[]>([])
     const [invoices, setInvoices] = useState<Invoice[]>([])
-    const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES)
+    const [categories, setCategories] = useState<string[]>(['Other'])
     const [amount, setAmount] = useState(initialData?.amount?.toString() || '')
-    const [category, setCategory] = useState(initialData?.category || DEFAULT_CATEGORIES[0])
+    const [category, setCategory] = useState(initialData?.category || 'Other')
     const [customCategory, setCustomCategory] = useState('')
     const [date, setDate] = useState(initialData?.date || format(new Date(), 'yyyy-MM-dd'))
     const [description, setDescription] = useState(initialData?.description || '')
@@ -40,11 +38,11 @@ export default function ExpenseModal({ onClose, onSuccess, initialData }: Expens
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if (initialData && !DEFAULT_CATEGORIES.includes(initialData.category)) {
+        if (initialData && categories.length > 0 && !categories.includes(initialData.category)) {
             setCategory('Other')
             setCustomCategory(initialData.category)
         }
-    }, [initialData])
+    }, [initialData, categories])
 
     useEffect(() => {
         if (activeBusiness) {
@@ -65,9 +63,14 @@ export default function ExpenseModal({ onClose, onSuccess, initialData }: Expens
                 .eq('business_id', activeBusiness.id)
                 .then(({ data }) => {
                     if (data && data.length > 0) {
-                        setCategories([...DEFAULT_CATEGORIES, ...data.map(c => c.name), 'Other'])
+                        setCategories([...data.map(c => c.name), 'Other'])
+                        // Set initial category to first available if current is not valid
+                        if (!data.map(c => c.name).includes(category) && category !== 'Other') {
+                            setCategory(data[0].name)
+                        }
                     } else {
-                        setCategories([...DEFAULT_CATEGORIES, 'Other'])
+                        setCategories(['Other'])
+                        setCategory('Other')
                     }
                 })
 

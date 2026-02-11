@@ -24,8 +24,13 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
             <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
 
             <div className="relative z-10 w-32 h-32 bg-white/10 rounded-3xl flex flex-col items-center justify-center backdrop-blur-md mb-8 animate-bounce border border-white/20 shadow-2xl">
-                <span className="text-white font-black text-5xl leading-none tracking-tighter mb-2">BSC</span>
-                <span className="text-blue-100 font-bold text-xl tracking-[0.3em]">PRO</span>
+                <span
+                    className="font-black text-5xl leading-none tracking-tighter mb-2 bg-clip-text text-transparent bg-center bg-cover drop-shadow-sm"
+                    style={{ backgroundImage: 'url(/src/assets/purple-heart.png)' }}
+                >
+                    BSC
+                </span>
+                <span className="text-blue-100 font-bold text-xl tracking-[0.3em] drop-shadow-md">PRO</span>
             </div>
 
             <h1 className="text-3xl font-bold text-white mb-2 animate-pulse">

@@ -156,62 +156,79 @@ export default function Invoices() {
                                 <th className="p-4 font-semibold">Customer</th>
                                 <th className="p-4 font-semibold">Date</th>
                                 <th className="p-4 font-semibold">Due Date</th>
+                                <th className="p-4 font-semibold text-right">Yield</th>
                                 <th className="p-4 font-semibold">Amount</th>
                                 <th className="p-4 font-semibold">Status</th>
                                 <th className="p-4 font-semibold">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--color-secondary)]/10">
-                            {filteredInvoices.map(invoice => (
-                                <tr key={invoice.id} className="hover:bg-[var(--color-bg)]/30 transition-colors">
-                                    <td className="p-4 font-medium">{invoice.invoice_number}</td>
-                                    <td className="p-4">{invoice.customers?.name}</td>
-                                    <td className="p-4">{format(new Date(invoice.issue_date), 'MMM dd, yyyy')}</td>
-                                    <td className="p-4">{format(new Date(invoice.due_date), 'MMM dd, yyyy')}</td>
-                                    <td className="p-4 font-medium">
-                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: activeBusiness?.currency || 'USD' }).format(invoice.total_amount)}
-                                    </td>
-                                    <td className="p-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium uppercase
+                            {filteredInvoices.map(invoice => {
+                                const expensesSum = invoice.expenses?.reduce((sum, e) => sum + e.amount, 0) || 0
+                                const yieldAmount = invoice.total_amount - expensesSum
+                                const yieldPercent = invoice.total_amount > 0 ? (yieldAmount / invoice.total_amount) * 100 : 0
+
+                                return (
+                                    <tr key={invoice.id} className="hover:bg-[var(--color-bg)]/30 transition-colors">
+                                        <td className="p-4 font-medium">{invoice.invoice_number}</td>
+                                        <td className="p-4">{invoice.customers?.name}</td>
+                                        <td className="p-4">{format(new Date(invoice.issue_date), 'MMM dd, yyyy')}</td>
+                                        <td className="p-4">{format(new Date(invoice.due_date), 'MMM dd, yyyy')}</td>
+                                        <td className="p-4 text-right font-medium">
+                                            <div className="flex flex-col items-end">
+                                                <span className={yieldAmount < 0 ? 'text-red-600' : 'text-green-600'}>
+                                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: activeBusiness?.currency || 'USD' }).format(yieldAmount)}
+                                                </span>
+                                                <span className="text-xs text-gray-400">
+                                                    {yieldPercent.toFixed(1)}%
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 font-medium">
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: activeBusiness?.currency || 'USD' }).format(invoice.total_amount)}
+                                        </td>
+                                        <td className="p-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium uppercase
                       ${invoice.status === 'paid' ? 'bg-green-100 text-green-700' :
-                                                invoice.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                            {invoice.status}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 flex items-center gap-1">
-                                        <button
-                                            onClick={() => setSelectedInvoice(invoice)}
-                                            className="p-2 text-[var(--color-secondary)] hover:text-[var(--color-primary)] transition-colors"
-                                            title="Print/Preview"
-                                        >
-                                            <Printer size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleEdit(invoice)}
-                                            className="p-2 text-[var(--color-secondary)] hover:text-blue-600 transition-colors"
-                                            title="Edit Invoice"
-                                        >
-                                            <Edit size={18} />
-                                        </button>
-                                        {invoice.status !== 'paid' && (
+                                                    invoice.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                {invoice.status}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 flex items-center gap-1">
                                             <button
-                                                onClick={() => setSelectedInvoiceForPayment(invoice)}
-                                                className="p-2 text-[var(--color-secondary)] hover:text-green-600 transition-colors"
-                                                title="Record Payment"
+                                                onClick={() => setSelectedInvoice(invoice)}
+                                                className="p-2 text-[var(--color-secondary)] hover:text-[var(--color-primary)] transition-colors"
+                                                title="Print/Preview"
                                             >
-                                                <DollarSign size={18} />
+                                                <Printer size={18} />
                                             </button>
-                                        )}
-                                        <button
-                                            onClick={() => handleDelete(invoice.id)}
-                                            className="p-2 text-[var(--color-secondary)] hover:text-red-500 transition-colors"
-                                            title="Delete Invoice"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                                            <button
+                                                onClick={() => handleEdit(invoice)}
+                                                className="p-2 text-[var(--color-secondary)] hover:text-blue-600 transition-colors"
+                                                title="Edit Invoice"
+                                            >
+                                                <Edit size={18} />
+                                            </button>
+                                            {invoice.status !== 'paid' && (
+                                                <button
+                                                    onClick={() => setSelectedInvoiceForPayment(invoice)}
+                                                    className="p-2 text-[var(--color-secondary)] hover:text-green-600 transition-colors"
+                                                    title="Record Payment"
+                                                >
+                                                    <DollarSign size={18} />
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleDelete(invoice.id)}
+                                                className="p-2 text-[var(--color-secondary)] hover:text-red-500 transition-colors"
+                                                title="Delete Invoice"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
                             {filteredInvoices.length === 0 && (
                                 <tr>
                                     <td colSpan={7} className="p-8 text-center opacity-50">No invoices found.</td>
