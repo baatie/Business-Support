@@ -70,7 +70,7 @@ export default function Invoices() {
             .from('invoices')
             .select('*, customers(name, email, logo_url, address), customer_contacts(name, email), expenses(*)')
             .eq('business_id', activeBusiness.id)
-            .order('created_at', { ascending: false })
+            .order('issue_date', { ascending: false })
 
         if (error) {
             console.error(error)
