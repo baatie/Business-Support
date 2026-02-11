@@ -172,8 +172,8 @@ export default function Invoices() {
                                     <tr key={invoice.id} className="hover:bg-[var(--color-bg)]/30 transition-colors">
                                         <td className="p-4 font-medium">{invoice.invoice_number}</td>
                                         <td className="p-4">{invoice.customers?.name}</td>
-                                        <td className="p-4">{format(new Date(invoice.issue_date), 'MMM dd, yyyy')}</td>
-                                        <td className="p-4">{format(new Date(invoice.due_date), 'MMM dd, yyyy')}</td>
+                                        <td className="p-4">{format(new Date(invoice.issue_date + 'T00:00:00'), 'MMM dd, yyyy')}</td>
+                                        <td className="p-4">{format(new Date(invoice.due_date + 'T00:00:00'), 'MMM dd, yyyy')}</td>
                                         <td className="p-4 text-right font-medium">
                                             <div className="flex flex-col items-end">
                                                 <span className={yieldAmount < 0 ? 'text-red-600' : 'text-green-600'}>
@@ -299,11 +299,11 @@ export default function Invoices() {
                                     <div className="text-right">
                                         <div className="mb-2">
                                             <span className="text-gray-600">Issue Date:</span>
-                                            <span className="font-medium ml-2">{format(new Date(selectedInvoice.issue_date), 'MMM dd, yyyy')}</span>
+                                            <span className="font-medium ml-2">{format(new Date(selectedInvoice.issue_date + 'T00:00:00'), 'MMM dd, yyyy')}</span>
                                         </div>
                                         <div className="mb-2">
                                             <span className="text-gray-600">Due Date:</span>
-                                            <span className="font-bold ml-2 text-red-600">{format(new Date(selectedInvoice.due_date), 'MMM dd, yyyy')}</span>
+                                            <span className="font-bold ml-2 text-red-600">{format(new Date(selectedInvoice.due_date + 'T00:00:00'), 'MMM dd, yyyy')}</span>
                                         </div>
                                         {selectedInvoice.customer_contacts && (
                                             <div className="mt-4 text-sm bg-gray-50 p-2 rounded inline-block text-left min-w-[200px]">

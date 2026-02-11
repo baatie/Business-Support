@@ -141,7 +141,7 @@ export default function Projects() {
                             <div className="flex gap-4 mb-4 text-xs text-gray-500">
                                 {project.start_date && (
                                     <div className="flex items-center gap-1">
-                                        <Calendar size={14} /> {format(new Date(project.start_date), 'MMM yyyy')}
+                                        <Calendar size={14} /> {format(new Date(project.start_date + 'T00:00:00'), 'MMM yyyy')}
                                     </div>
                                 )}
                                 {project.budget && (

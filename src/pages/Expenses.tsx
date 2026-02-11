@@ -157,7 +157,7 @@ export default function Expenses() {
                         <tbody className="divide-y divide-[var(--color-secondary)]/10">
                             {filteredExpenses.map(expense => (
                                 <tr key={expense.id} className="hover:bg-[var(--color-bg)]/30 transition-colors group">
-                                    <td className="p-4">{format(new Date(expense.date), 'MMM dd, yyyy')}</td>
+                                    <td className="p-4">{format(new Date(expense.date + 'T00:00:00'), 'MMM dd, yyyy')}</td>
                                     <td className="p-4 font-medium">{expense.description}</td>
                                     <td className="p-4">
                                         <span className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-600">
