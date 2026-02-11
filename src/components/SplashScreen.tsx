@@ -23,22 +23,43 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         >
             <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
 
-            <div className="relative z-10 w-32 h-32 bg-white/10 rounded-3xl flex flex-col items-center justify-center backdrop-blur-md mb-8 animate-bounce border border-white/20 shadow-2xl">
-                <span
-                    className="font-black text-5xl leading-none tracking-tighter mb-2 bg-clip-text text-transparent bg-center bg-cover drop-shadow-sm"
-                    style={{ backgroundImage: 'url(/src/assets/purple-heart.png)' }}
-                >
-                    BSC
-                </span>
-                <span className="text-blue-100 font-bold text-xl tracking-[0.3em] drop-shadow-md">PRO</span>
-            </div>
+            <div className="relative z-10 flex flex-col items-center">
+                {/* Logo Container */}
+                <div className="relative mb-12">
+                    {/* Diamond Shape with Purple Heart Texture */}
+                    <div
+                        className="w-32 h-32 rounded-3xl rotate-45 flex items-center justify-center shadow-2xl animate-fade-in"
+                        style={{
+                            backgroundImage: 'url(/src/assets/purple-heart.png)',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)'
+                        }}
+                    >
+                        {/* Un-rotate text inside */}
+                        <div className="-rotate-45">
+                            <span className="text-white font-black text-4xl tracking-tighter drop-shadow-md">
+                                BSC
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
-            <h1 className="text-3xl font-bold text-white mb-2 animate-pulse">
-                Business Support
-            </h1>
-            <p className="text-white/60 font-bold uppercase tracking-[0.2em] text-sm">
-                Controller Pro
-            </p>
+                {/* Text Content */}
+                <div className="text-center space-y-2 mb-8 animate-slide-up">
+                    <h2 className="text-white/80 text-sm font-bold tracking-[0.3em] uppercase">
+                        Business Support
+                    </h2>
+                    <h1 className="text-white text-3xl font-black tracking-[0.2em] uppercase drop-shadow-lg">
+                        Controller Pro
+                    </h1>
+                </div>
+
+                {/* Loading Bar */}
+                <div className="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white/80 rounded-full animate-progress origin-left"></div>
+                </div>
+            </div>
         </div>
     )
 }
