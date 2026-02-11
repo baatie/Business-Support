@@ -4,8 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { MOCK_INVOICES, MOCK_EXPENSES } from '../lib/mockData'
 import { DollarSign, TrendingUp, TrendingDown, AlertTriangle, Lightbulb, CheckCircle, Percent } from 'lucide-react'
-import { generateInsights } from '../lib/insights'
-import type { Insight } from '../lib/insights'
+import { generateInsights, generateFinancialHealthData, type Insight, type FinancialHealthData } from '../lib/insights'
 import { useNavigate } from 'react-router-dom'
 
 export default function Dashboard() {
@@ -14,6 +13,7 @@ export default function Dashboard() {
     const [invoices, setInvoices] = useState<any[]>([])
     const [expenses, setExpenses] = useState<any[]>([])
     const [insights, setInsights] = useState<Insight[]>([])
+    const [financialHealth, setFinancialHealth] = useState<FinancialHealthData[]>([])
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
@@ -26,6 +26,7 @@ export default function Dashboard() {
                 setInvoices(MOCK_INVOICES)
                 setExpenses(MOCK_EXPENSES)
                 setInsights(generateInsights(MOCK_INVOICES, MOCK_EXPENSES, activeBusiness))
+                setFinancialHealth(generateFinancialHealthData(MOCK_INVOICES, MOCK_EXPENSES))
                 setLoading(false)
                 return
             }
@@ -45,6 +46,7 @@ export default function Dashboard() {
 
             const generated = generateInsights(invData || [], expData || [], activeBusiness)
             setInsights(generated)
+            setFinancialHealth(generateFinancialHealthData(invData || [], expData || []))
 
             setLoading(false)
         }
@@ -89,6 +91,9 @@ export default function Dashboard() {
     }
 
     if (loading) return <div className="p-8 text-center text-[var(--color-primary)]">Loading Dashboard...</div>
+
+    // Chart Scaling
+    const maxChartValue = Math.max(...financialHealth.map(d => Math.max(d.revenue, d.expenses))) || 1000
 
     return (
         <div className="p-6 max-w-7xl mx-auto animate-fade-in text-[var(--color-primary)]">
@@ -153,11 +158,49 @@ export default function Dashboard() {
             {/* AI Strategy & Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
-                    {/* Recent Activity or Chart could go here */}
+                    {/* Financial Health Chart */}
                     <div className="card p-6">
-                        <h3 className="text-xl font-bold mb-4">Financial Health</h3>
-                        <div className="h-48 flex items-center justify-center border-2 border-dashed border-[var(--color-secondary)]/30 rounded-lg text-[var(--color-secondary)]">
-                            Chart Placeholder (Coming Soon)
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold">Financial Health</h3>
+                            <div className="flex gap-4 text-xs font-medium">
+                                <div className="flex items-center gap-1">
+                                    <div className="w-3 h-3 bg-green-500 rounded-sm"></div> Revenue
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <div className="w-3 h-3 bg-red-500 rounded-sm"></div> Expenses
+                                </div>
+                                <div className="flex items-center gap-1 opacity-60">
+                                    <div className="w-3 h-3 border border-gray-400 border-dashed rounded-sm"></div> Projected
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="h-64 flex items-end justify-between gap-2 md:gap-4 pb-2 border-b border-gray-200">
+                            {financialHealth.map((item, index) => (
+                                <div key={index} className={`flex-1 flex flex-col items-center justify-end h-full gap-1 group relative ${item.isProjected ? 'opacity-70' : ''}`}>
+                                    {/* Tooltip */}
+                                    <div className="absolute -top-12 bg-gray-800 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap pointer-events-none">
+                                        Profit: {formatCurrency(item.profit)}
+                                    </div>
+
+                                    {/* Bars Container */}
+                                    <div className="w-full h-full flex items-end justify-center gap-1">
+                                        {/* Revenue Bar */}
+                                        <div
+                                            className={`w-3 md:w-6 bg-green-500 rounded-t-sm transition-all duration-500 ${item.isProjected ? 'bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,rgba(34,197,94,0.5)_5px,rgba(34,197,94,0.5)_10px)] bg-green-100 border border-green-500' : ''}`}
+                                            style={{ height: `${Math.max(5, (item.revenue / maxChartValue) * 100)}%` }}
+                                        ></div>
+                                        {/* Expense Bar */}
+                                        <div
+                                            className={`w-3 md:w-6 bg-red-500 rounded-t-sm transition-all duration-500 ${item.isProjected ? 'bg-[repeating-linear-gradient(45deg,transparent,transparent_5px,rgba(239,68,68,0.5)_5px,rgba(239,68,68,0.5)_10px)] bg-red-100 border border-red-500' : ''}`}
+                                            style={{ height: `${Math.max(5, (item.expenses / maxChartValue) * 100)}%` }}
+                                        ></div>
+                                    </div>
+
+                                    {/* Month Label */}
+                                    <span className="text-xs text-gray-500 font-medium mt-2">{item.month}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

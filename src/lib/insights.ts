@@ -63,3 +63,66 @@ export function generateInsights(
 
     return insights
 }
+
+export interface FinancialHealthData {
+    month: string
+    revenue: number
+    expenses: number
+    profit: number
+    isProjected?: boolean
+}
+
+export function generateFinancialHealthData(
+    invoices: any[],
+    expenses: any[]
+): FinancialHealthData[] {
+    const data: FinancialHealthData[] = []
+    const today = new Date()
+
+    // Generate last 6 months
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
+        const monthKey = d.toLocaleString('default', { month: 'short' })
+        const year = d.getFullYear()
+
+        // Filter for this month
+        const monthlyInvoices = invoices.filter(inv => {
+            const invDate = new Date(inv.issue_date)
+            return invDate.getMonth() === d.getMonth() && invDate.getFullYear() === year && inv.status !== 'cancelled'
+        })
+
+        const monthlyExpenses = expenses.filter(exp => {
+            const expDate = new Date(exp.date)
+            return expDate.getMonth() === d.getMonth() && expDate.getFullYear() === year
+        })
+
+        const revenue = monthlyInvoices.reduce((sum, inv) => sum + inv.total_amount, 0)
+        const expenseTotal = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0)
+
+        data.push({
+            month: monthKey,
+            revenue,
+            expenses: expenseTotal,
+            profit: revenue - expenseTotal
+        })
+    }
+
+    // Simple Forecast (Projected next month)
+    // Average growth of last 3 months
+    const last3Months = data.slice(-3)
+    const avgRevenue = last3Months.reduce((sum, d) => sum + d.revenue, 0) / 3
+    const avgExpenses = last3Months.reduce((sum, d) => sum + d.expenses, 0) / 3
+
+    // Add a slight "growth factor" for optimism/demo purposes
+    const nextMonthDate = new Date(today.getFullYear(), today.getMonth() + 1, 1)
+
+    data.push({
+        month: nextMonthDate.toLocaleString('default', { month: 'short' }),
+        revenue: avgRevenue * 1.1,
+        expenses: avgExpenses * 1.05,
+        profit: (avgRevenue * 1.1) - (avgExpenses * 1.05),
+        isProjected: true
+    })
+
+    return data
+}
