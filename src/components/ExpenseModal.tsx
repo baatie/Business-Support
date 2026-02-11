@@ -58,7 +58,7 @@ export default function ExpenseModal({ onClose, onSuccess, initialData }: Expens
         if (activeBusiness) {
             // Fetch custom categories
             supabase
-                .from('custom_expense_categories')
+                .from('expense_categories')
                 .select('name')
                 .eq('business_id', activeBusiness.id)
                 .then(({ data }) => {
