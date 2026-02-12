@@ -29,12 +29,17 @@ export default function Auth() {
                 if (error) throw error
                 setMessage('Check your email for the password reset link.')
             } else if (isSignUp) {
-                const { error } = await supabase.auth.signUp({
+                const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                 })
                 if (error) throw error
-                // Navigate or show message
+
+                if (data.session) {
+                    navigate('/')
+                } else {
+                    setMessage('Account created! Please check your email to confirm.')
+                }
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,

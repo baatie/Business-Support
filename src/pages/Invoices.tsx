@@ -148,7 +148,7 @@ export default function Invoices() {
             {loading ? (
                 <div className="text-center py-12">Loading...</div>
             ) : (
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow border border-[var(--color-secondary)]/20 overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow border border-[var(--color-secondary)]/20 overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-[var(--color-bg)]/50 border-b border-[var(--color-secondary)]/10">
                             <tr>

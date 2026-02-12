@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useBusiness } from '../context/BusinessContext'
 import { LayoutDashboard, Users, FileText, PieChart, Briefcase, Plus, LogOut, ChevronDown, Menu, X, Settings as SettingsIcon } from 'lucide-react'
 import CreateBusinessModal from './CreateBusinessModal'
+import Onboarding from './Onboarding'
 
 export default function Layout() {
     const { signOut, user } = useAuth()
@@ -31,6 +32,11 @@ export default function Layout() {
 
     if (businessLoading) {
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    }
+
+    // Show onboarding if user has no businesses
+    if (user && businesses.length === 0) {
+        return <Onboarding />
     }
 
     return (
