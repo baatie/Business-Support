@@ -24,7 +24,7 @@ export default function Auth() {
         try {
             if (isReset) {
                 const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.origin + '/reset-password',
+                    redirectTo: window.location.origin + '/update-password',
                 })
                 if (error) throw error
                 setMessage('Check your email for the password reset link.')
@@ -38,7 +38,9 @@ export default function Auth() {
                 if (data.session) {
                     navigate('/')
                 } else {
-                    setMessage('Account created! Please check your email to confirm.')
+                    setMessage('✅ Account created! Please check your email inbox (and spam folder) to confirm your registration.')
+                    setEmail('')
+                    setPassword('')
                 }
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
